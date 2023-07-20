@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState(false); // Add loginError state
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
@@ -17,10 +18,18 @@ const Login = () => {
 
   const { dispatch } = useContext(AuthContext)
 
-  const handleLogin = (e)=>{
-    e.preventDefault()
-    login({email,password},dispatch)
-  }
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      // Assuming the login function returns a promise (async function)
+      await login({ email, password }, dispatch);
+      // If login is successful, no need to show any error
+      setLoginError(false);
+    } catch (error) {
+      // If login fails, set the loginError state to true
+      setLoginError(true);
+    }
+  };
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -62,19 +71,26 @@ const Login = () => {
               Sign In
             </button>
           </div>
+
+          {/* Display error message if loginError is true */}
+          {loginError && (
+            <p className="text-red-500 text-sm mt-2">
+              Invalid credentials. Please check your email and password.
+            </p>
+          )}
         </form>
+
         <div className='flex'>
-            <p className='ml-2'>Don't have an account?</p>
-            <button type="submit" className="create-account">
-              <Link to="/register" className="link ml-2">
-                Sign Up
-              </Link>
-            </button>
-          </div>
+          <p className='ml-2'>Don't have an account?</p>
+          <button type="submit" className="create-account">
+            <Link to="/register" className="link ml-2">
+              Sign Up
+            </Link>
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Login;
-
