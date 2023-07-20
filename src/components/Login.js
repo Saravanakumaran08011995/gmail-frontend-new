@@ -1,12 +1,12 @@
 import React, { useContext, useState } from 'react';
-import { login } from "../authContext/apiCalls"
+import axios from 'axios'; // Import axios library or use your preferred HTTP client
 import { AuthContext } from '../authContext/AuthContext';
 import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loginError, setLoginError] = useState(false); // Add loginError state
+  const [loginError, setLoginError] = useState(false);
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
@@ -16,18 +16,25 @@ const Login = () => {
     setPassword(event.target.value);
   };
 
-  const { dispatch } = useContext(AuthContext)
+  const { dispatch } = useContext(AuthContext);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // Assuming the login function returns a promise (async function)
-      await login({ email, password }, dispatch);
-      // If login is successful, no need to show any error
-      setLoginError(false);
+      const response = await axios.post('https://gmail-backend-new.vercel.app/api/auth/login', {
+        email,
+        password,
+      });
+      const { accessToken, ...userInfo } = response.data;
+      // Assuming you have a login success action in your AuthContext
+      dispatch({ type: 'LOGIN_SUCCESS', payload: { user: userInfo, accessToken } });
+      setLoginError(false); // Reset the loginError state on successful login
     } catch (error) {
-      // If login fails, set the loginError state to true
-      setLoginError(true);
+      if (error.response && error.response.status === 401) {
+        setLoginError(true); // Set loginError state to true on 401 response (invalid credentials)
+      } else {
+        console.error('Login failed due to an unexpected error:', error);
+      }
     }
   };
 
