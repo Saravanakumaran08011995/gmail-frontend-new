@@ -1,27 +1,34 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/api';
 
 const Register = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [username, setUsername] = useState("");
-    const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [registrationError, setRegistrationError] = useState(null);
+  const navigate = useNavigate();
 
-    const handleFinish = async (e) => {
-        e.preventDefault();
-    
-        try {
-          await api.post("api/auth/register", { email, username, password });
-          navigate("/login");
-        } catch (err) {
-          console.log("API Call Error:", err);
-        }
-      };
+  const handleFinish = async (e) => {
+    e.preventDefault();
 
-    const handleUserNameChange = (event) => {
-        setUsername(event.target.value);
-      };
+    try {
+      await api.post('api/auth/register', { email, username, password });
+      navigate('/login');
+    } catch (err) {
+      console.log('API Call Error:', err);
+      if (err.response && err.response.status === 409) {
+        // 409 status code means conflict (duplicate email)
+        setRegistrationError('Email is already taken. Please choose a different email.');
+      } else {
+        setRegistrationError('An error occurred during registration. Please try again later.');
+      }
+    }
+  };
+
+  const handleUserNameChange = (event) => {
+    setUsername(event.target.value);
+  };
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
@@ -31,21 +38,19 @@ const Register = () => {
     setPassword(event.target.value);
   };
 
-  
-
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-50">
       <div className="w-full max-w-md">
         <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onSubmit={handleFinish}>
           <h1 className="text-2xl mb-6 font-bold text-gray-800">Create an Account</h1>
           <div className="mb-4">
-            <label className="block text-gray-700 font-bold mb-2" htmlFor="email">
+            <label className="block text-gray-700 font-bold mb-2" htmlFor="username">
               UserName
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="username"
-              type="username"
+              type="text"
               placeholder="User name"
               value={username}
               onChange={handleUserNameChange}
@@ -85,15 +90,21 @@ const Register = () => {
               Register
             </button>
           </div>
+
+          {/* Display registrationError message if present */}
+          {registrationError && (
+            <p className="text-red-500 text-sm mt-2">{registrationError}</p>
+          )}
         </form>
-        <div className='flex'>
-            <p className='ml-2'>Already have an account?</p>
-            <button type="submit" className="create-account">
-              <Link to="/login" className="link ml-2">
-                Sign In
-              </Link>
-            </button>
-          </div>
+
+        <div className="flex">
+          <p className="ml-2">Already have an account?</p>
+          <button type="submit" className="create-account">
+            <Link to="/login" className="link ml-2">
+              Sign In
+            </Link>
+          </button>
+        </div>
       </div>
     </div>
   );
