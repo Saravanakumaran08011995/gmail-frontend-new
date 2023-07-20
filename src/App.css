@@ -1,0 +1,23 @@
+.App {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .content-wrapper {
+    display: flex;
+    flex-grow: 1;
+    overflow-y: hidden;
+  }
+  
+  .routes-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+  
+
+
+
+
+
+  
